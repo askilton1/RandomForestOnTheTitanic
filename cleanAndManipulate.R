@@ -29,8 +29,9 @@ raw<-raw %>%
   mutate(sex_age = ifelse(is.na(Age),as.character(Sex),ifelse(Age<=10 | (Age <= 15 & Parch>0),"child",as.character(Sex)))) %>%
   select(-title,-Pclass,-cabin_letter.G,-cabin_letter.A,-cabin_letter.T,-cabin_letter.C) %>%
 #  select(Survived,Sex,sex_age,contains("title"),contains("Pclass"),contains("cabin_letter"),Embarked,Fare,Parch,familySize) %>%
-  mutate_at(as.factor) %>%
-  na.omit()
+  # mutate_at(as.factor) %>%
+  na.omit %>%
+  mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
 raw$Fare <- as.numeric(as.character(raw$Fare)) 
 
 clean <- list() 
