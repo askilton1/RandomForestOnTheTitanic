@@ -28,7 +28,7 @@ raw<-tbl_df(raw)
 raw<-raw %>%
   mutate(sex_age = ifelse(is.na(Age),as.character(Sex),ifelse(Age<=10 | (Age <= 15 & Parch>0),"child",as.character(Sex)))) %>%
   select(-title,-Pclass,-cabin_letter.G,-cabin_letter.A,-cabin_letter.T,-cabin_letter.C) %>%
-  select(-cabin_letter) %>%
+  select(-Cabin) %>%
 #  select(Survived,Sex,sex_age,contains("title"),contains("Pclass"),contains("cabin_letter"),Embarked,Fare,Parch,familySize) %>%
   # mutate_at(as.factor) %>%
   na.omit %>%
