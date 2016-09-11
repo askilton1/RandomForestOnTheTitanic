@@ -19,8 +19,7 @@ raw$Ticket_numeric <- as.numeric(gsub("[^0-9]","",raw$Ticket))
 raw$Ticket_numeric[raw$Ticket_numeric==3] <- NA
 raw$Ticket_group[raw$Ticket_numeric < 75000] <- "A"
 raw$Ticket_group[raw$Ticket_numeric > 75000 & raw$Ticket_numeric < 150000] <- "B"
-raw$Ticket_group[raw$Ticket_numeric > 150000 & raw$Ticket_numeric < 300000] <- "C"
-raw$Ticket_group[raw$Ticket_numeric > 300000 ] <- "C"
+raw$Ticket_group[raw$Ticket_numeric > 150000] <- "C"
 raw <- cbind(raw,predict(dummyVars(~Ticket_group, data = raw), newdata = raw))
 
 
@@ -44,15 +43,15 @@ raw<-raw %>%
                 contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
   na.omit() %>%
   mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
-#raw$Fare <- as.numeric(as.character(raw$Fare)) 
+
 raw$Ticket_group <- as.factor(raw$Ticket_group)
 if(linear==FALSE){
   clean <- list() 
-  clean$predictors <- raw %>% dplyr::select(-Survived,-contains("group")) 
+  clean$predictors <- raw %>% dplyr::select(-Survived,-Ticket_groupA,-Ticket_groupB,-Ticket_groupC) 
   clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)
 } else if (linear==TRUE){
   raw <- raw %>%
-    dplyr::select(-title.mr,-Pclass.3,-Embarked.S,-Ticket_numericC)
+    dplyr::select(-title.mr,-Pclass.3,-Embarked.S,-Ticket_numericC,-ticket_group,-ticket_group,-ticket_groupC)
   clean <- list() 
   clean$predictors <- raw %>% dplyr::select(-Survived) 
   clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)
