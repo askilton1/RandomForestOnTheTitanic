@@ -119,8 +119,15 @@ training_data$Ticket_numeric[training_data$Ticket_numeric==3 | training_data$Tic
 library(ggplot2)
 ggplot(training_data,aes(Ticket_numeric)) + 
   geom_histogram()
-# ggplot(training_data,aes(as.factor(Survived),Ticket_numeric)) + 
-#   geom_boxplot()
 ```
 
 ---
+
+## Ticket Number
+#### To find patterns in the assignment of ticket numbers, we plot a histogram
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+ggplot(training_data,aes(Ticket_numeric)) + 
+  geom_histogram()
+```
+
