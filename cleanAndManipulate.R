@@ -9,12 +9,15 @@ raw$title[is.na(raw$title)] <- ifelse(raw$Sex[is.na(raw$title)]=="female","mrs",
 require(caret)
 raw <- cbind(raw,predict(dummyVars(~title, data = raw), newdata = raw))
 raw$Pclass <- as.factor(raw$Pclass);raw <- cbind(raw,predict(dummyVars(~Pclass, data = raw), newdata = raw))
+raw <- cbind(raw,predict(dummyVars(~Embarked, data = raw), newdata = raw))
 
 raw$cabin_letter <- "U"
 for(letter in c("A","B","C","D","E","F","T","G")) raw$cabin_letter[grepl(letter,raw$Cabin)] <- letter
 raw$cabin_letter <- as.factor(raw$cabin_letter)
 raw <- cbind(raw,predict(dummyVars(~cabin_letter, data = raw), newdata = raw))
 #attach(raw);table(Survived,cabin_letter);detach(raw)
+
+
 
 #Imputing Data
 raw$Embarked[raw$Embarked==""] <- NA
@@ -28,18 +31,15 @@ raw$adultMale[is.na(raw$Age) & as.character(raw$Sex) == "male"] <- 1
 raw$adultFemale[is.na(raw$Age) & as.character(raw$Sex) == "female"] <- 1
 raw$child[raw$Age<=10 | (raw$Age <= 15 & raw$Parch>0) | raw$SibSp > 1 | raw$title=="master"] <- 1
 
-ifelse(is.na(raw$Age),as.character(raw$Sex),
-       ifelse(raw$Age<=10 | (raw$Age <= 15 & raw$Parch>0),"child",as.character(raw$Sex)))
-
 library(dplyr)
 raw<-tbl_df(raw)
 raw<-raw %>%
-  dplyr::select(-title,-Pclass,-cabin_letter.G,-cabin_letter.A,-cabin_letter.T,-cabin_letter.C,-sex_age) %>%
+  dplyr::select(-title,-Pclass,-cabin_letter.G,-cabin_letter.A,-cabin_letter.T,-cabin_letter.C,-cabin_letter,-Embarked) %>%
   dplyr::select(-Sex) %>%
   #dplyr::select(-Cabin,-Ticket,-Name,cabin_letter.B) %>%
   dplyr::select(Survived,
          #Sex,
-         contains("sex_age"),contains("title"),contains("Pclass"),contains("cabin_letter"),Embarked,Fare,Parch,familySize,
+         contains("title"),contains("Pclass"),contains("cabin_letter"),contains("Embarked"),Fare,Parch,familySize,
          PassengerId) %>%
   #mutate_at(as.factor) %>%
   na.omit %>%
