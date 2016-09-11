@@ -1,0 +1,126 @@
+---
+title       : Titanic Passenger Survival
+subtitle    : Using data cleaning, random forests, and logistic regression to predict passenger survival on the RMS Titanic
+author      : Antonio Skilton
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## training_data Data
+```{r,echo=FALSE}
+training_data <- read.csv("data/train.csv")
+```
+```{r,echo=FALSE}
+str(training_data)
+```
+
+
+--- .class #id 
+
+## Name/Title
+#### The names all have some title associated with them:
+
+```{r}
+training_data$Name[1:9]
+```
+
+
+---
+
+## Name/Title
+#### For most passengers we can produce a category related to title:
+```{r}
+training_data$title <- NA
+attach(training_data)
+
+
+for(string in c("master","mr","miss","mrs")) {
+  training_data$title[grepl(string,Name,ignore.case=T)] <- string 
+  }
+```
+#### And we assume that all with alternate titles are adults and assign them titles based on sex
+```{r}
+title[is.na(title)]<-ifelse(Sex[is.na(title)]=="female","mrs","mr")
+```
+```{r,echo=FALSE}
+detach(training_data)
+```
+
+--- 
+
+## Name/Title
+#### Which gives us the following result:
+
+```{r, message=FALSE, warning=FALSE}
+training_data[1:9,c("Name","title")]
+```
+
+---
+
+## Name/Title
+#### Is there a pattern our models could use to predict survival?
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+attach(training_data)
+library(googleVis)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+table(Survived,title)
+detach(training_data)
+library(dplyr)
+df <- training_data %>% group_by(title) %>% summarize(prcnt=mean(Survived), prcnt.html.tooltip=n()) %>%filter(!is.na(title)) %>% mutate(prcnt.certainty=c(TRUE,FALSE,TRUE,FALSE))
+p<-gvisColumnChart(df,xvar="title",yvar=c("prcnt","prcnt.certainty")
+                   ,options=list(
+  title="In-Group Survival Rate by Title")
+  )
+```
+
+```{r gv,results='asis',echo=FALSE}
+print(p,"chart")
+```
+###### Clearly, adult men are fare less likely than either adult women or children of either gender to have survived the Titanic.
+
+---
+
+## Ticket
+#### We have a similar text issue with ticket number ...
+
+```{r}
+training_data$Ticket[1:40]
+```
+
+---
+
+## Ticket Number
+#### ... which we can solve with the gsub function:
+```{r, message=FALSE, warning=FALSE}
+attach(training_data)
+training_data$Ticket_numeric <- as.numeric(gsub("[^0-9]","",Ticket))
+```
+```{r,echo=FALSE}
+training_data$Ticket_numeric[training_data$Ticket_numeric==3] <- NA
+detach(training_data)
+```
+```{r}
+training_data[1:9,c("Ticket","Ticket_numeric")]
+```
+```{r,echo=FALSE}
+training_data$Ticket_numeric[training_data$Ticket_numeric==3 | training_data$Ticket_numeric > 2500000] <- NA
+```
+
+---
+## Ticket Number
+#### To find patterns in the assignment of ticket numbers, we plot a histogram
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+ggplot(training_data,aes(Ticket_numeric)) + 
+  geom_histogram()
+# ggplot(training_data,aes(as.factor(Survived),Ticket_numeric)) + 
+#   geom_boxplot()
+```
+
+---
