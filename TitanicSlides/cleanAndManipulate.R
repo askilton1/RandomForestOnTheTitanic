@@ -45,11 +45,11 @@ raw<-raw %>%
 raw$Ticket_group <- as.factor(raw$Ticket_group)
 if(linear==FALSE){
   clean <- list() 
-  clean$predictors <- raw %>% dplyr::select(-Survived,-Ticket_groupA,-Ticket_groupB,-Ticket_groupC) 
+  clean$predictors <- raw %>% dplyr::select(-Survived) 
   clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)
 } else if (linear==TRUE){
   raw <- raw %>%
-    dplyr::select(-title.mr,-Pclass.3,-Embarked.S,-Ticket_numericC,-ticket_group,-ticket_group,-ticket_groupC)
+    dplyr::select(-title.mr,-Pclass.3,-Embarked.S,-Ticket_grouphighTicketNumber)
   clean <- list() 
   clean$predictors <- raw %>% dplyr::select(-Survived) 
   clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)

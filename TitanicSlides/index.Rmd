@@ -141,7 +141,6 @@ table(survived_label,training_data$Ticket_group)
 ---
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE,fig.align='center',fig.width=12,fig.height=6}
-training_data$Ticket_numeric[training_data$Ticket_numeric==3] <- NA
 training_data$Ticket_group[training_data$Ticket_numeric < 300000] <- "lowTicketNumber"
 training_data$Ticket_group[training_data$Ticket_numeric >= 300000] <- "highTicketNumber"
 library(caret)
@@ -154,4 +153,20 @@ ggplot(training_data,aes(Ticket_numeric,fill=Ticket_group)) +
 table(survived_label,training_data$Ticket_group)
 ```
 
+
+
 ---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE,fig.align='center',fig.width=12,fig.height=6}
+training_data$Ticket_numeric[training_data$Ticket_numeric==3] <- NA
+training_data$Ticket_group[training_data$Ticket_numeric < 300000] <- "lowTicketNumber"
+training_data$Ticket_group[training_data$Ticket_numeric >= 300000] <- "highTicketNumber"
+library(caret)
+training_data <- cbind(training_data,predict(dummyVars(~Ticket_group, data = training_data), newdata = training_data))
+df <- training_data %>% select(Ticket_group,Ticket_numeric) %>% na.omit()
+library(ggplot2)
+ggplot(training_data,aes(Ticket_numeric,fill=Ticket_group)) +
+  geom_histogram(binwidth=5000) +
+  theme(legend.position="top")
+table(survived_label,training_data$Ticket_group)
+```
