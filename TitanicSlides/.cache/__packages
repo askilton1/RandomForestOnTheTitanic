@@ -1,3 +1,8 @@
 base
 slidify
 knitr
+googleVis
+dplyr
+ggplot2
+lattice
+caret

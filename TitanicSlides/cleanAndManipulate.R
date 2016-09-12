@@ -8,6 +8,8 @@ raw$title[is.na(raw$title)] <- ifelse(raw$Sex[is.na(raw$title)]=="female","mrs",
 require(caret)
 raw$title <- as.factor(raw$title)
 raw <- cbind(raw,predict(dummyVars(~title, data = raw), newdata = raw))
+
+
 #Pclass
 raw$Pclass <- as.factor(raw$Pclass);raw <- cbind(raw,predict(dummyVars(~Pclass, data = raw), newdata = raw))
 raw <- cbind(raw,predict(dummyVars(~Embarked, data = raw), newdata = raw))
@@ -37,10 +39,9 @@ raw$child[raw$Age<=10 | (raw$Age <= 15 & raw$Parch>0) | raw$SibSp > 1 | raw$titl
 library(dplyr)
 raw<-tbl_df(raw)
 raw<-raw %>%
-  dplyr::select(-title,-Pclass,-Embarked,-Ticket_numeric,-Embarked.) %>%
-  dplyr::select(-Sex) %>%
+  dplyr::select(-title,-Pclass,-Embarked,-Ticket_numeric,-Embarked.,-Sex,-title.master,-title.miss) %>%
   dplyr::select(Survived,
-                contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
+                child,contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
   na.omit() %>%
   mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
 

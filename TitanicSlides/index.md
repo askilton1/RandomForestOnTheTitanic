@@ -67,12 +67,15 @@ attach(training_data)
 
 for(string in c("master","mr","miss","mrs")) {
   training_data$title[grepl(string,Name,ignore.case=T)] <- string 
-  }
+}
+detach(training_data)
 ```
 #### And we assume that all with alternate titles are adults and assign them titles based on sex
 
 ```r
-title[is.na(title)]<-ifelse(Sex[is.na(title)]=="female","mrs","mr")
+attach(training_data)
+training_data$title[is.na(title)]<-ifelse(Sex[is.na(title)]=="female","mrs","mr")
+detach(training_data)
 ```
 
 
@@ -106,21 +109,20 @@ training_data[1:9,c("Name","title")]
 
 
 ```
-##         title
-## Survived  mr mrs
-##        0 468  81
-##        1 109 233
+##               
+## survived_label master miss  mr mrs
+##       died         17   54 451  27
+##       survived     23  126  86 107
 ```
-
 <!-- ColumnChart generated in R 3.3.1 by googleVis 0.6.1 package -->
-<!-- Sun Sep 11 13:22:27 2016 -->
+<!-- Mon Sep 12 10:00:26 2016 -->
 
 
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataColumnChartID11ed276d53eb5 () {
+function gvisDataColumnChartIDa936696a57bf () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -136,12 +138,12 @@ false
 ],
 [
 "mr",
-0.1583011583,
+0.1601489758,
 true
 ],
 [
 "mrs",
-0.7906976744,
+0.7985074627,
 false
 ] 
 ];
@@ -153,14 +155,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartColumnChartID11ed276d53eb5() {
-var data = gvisDataColumnChartID11ed276d53eb5();
+function drawChartColumnChartIDa936696a57bf() {
+var data = gvisDataColumnChartIDa936696a57bf();
 var options = {};
 options["allowHtml"] = true;
+options["legend"] = "none";
 options["title"] = "In-Group Survival Rate by Title";
 
     var chart = new google.visualization.ColumnChart(
-    document.getElementById('ColumnChartID11ed276d53eb5')
+    document.getElementById('ColumnChartIDa936696a57bf')
     );
     chart.draw(data,options);
     
@@ -184,9 +187,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartColumnChartID11ed276d53eb5);
+callbacks.push(drawChartColumnChartIDa936696a57bf);
 })();
-function displayChartColumnChartID11ed276d53eb5() {
+function displayChartColumnChartIDa936696a57bf() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -210,13 +213,14 @@ callbacks.shift()();
 </script>
  
 <!-- jsChart -->  
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartColumnChartID11ed276d53eb5"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartColumnChartIDa936696a57bf"></script>
  
 <!-- divChart -->
   
-<div id="ColumnChartID11ed276d53eb5" 
+<div id="ColumnChartIDa936696a57bf" 
   style="width: 500; height: automatic;">
 </div>
+
 ###### Clearly, adult men are fare less likely than either adult women or children of either gender to have survived the Titanic.
 
 ---
@@ -275,6 +279,17 @@ training_data[1:9,c("Ticket","Ticket_numeric")]
 ---
 ## Ticket Number
 #### To find patterns in the assignment of ticket numbers, we plot a histogram
-![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
+![plot of chunk unnamed-chunk-15](assets/fig/unnamed-chunk-15-1.png)
 
 ---
+
+
+<img src="assets/fig/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" style="display: block; margin: auto;" />
+
+```
+##               
+## survived_label highTicketNumber lowTicketNumber
+##       died                  222             290
+##       survived               57             272
+```
+
