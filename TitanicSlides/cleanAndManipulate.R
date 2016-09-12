@@ -12,6 +12,7 @@ raw <- cbind(raw,predict(dummyVars(~title, data = raw), newdata = raw))
 
 #Pclass
 raw$Pclass <- as.factor(raw$Pclass);raw <- cbind(raw,predict(dummyVars(~Pclass, data = raw), newdata = raw))
+#Embarked
 raw <- cbind(raw,predict(dummyVars(~Embarked, data = raw), newdata = raw))
 #cabin
 raw$cabin <- 0

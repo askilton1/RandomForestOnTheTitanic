@@ -11,7 +11,7 @@ set.seed(1)
 rf <- randomForest(predictors,Survived,importance=T,mtry=5)
 
 imp <- importance(rf, type=1)
-featureImportance <- data.frame(Feature=row.names(imp), Importance=imp[,2])
+featureImportance <- data.frame(Feature=row.names(imp), Importance=imp[,1])
 
 p <- ggplot(featureImportance, aes(x=reorder(Feature, Importance), y=Importance)) +
   geom_bar(stat="identity", fill="#53cfff") +
