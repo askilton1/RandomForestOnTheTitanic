@@ -18,10 +18,8 @@ raw$cabin <- 0
 raw$cabin[raw$Cabin==""] <- 1
 #Ticket
 raw$Ticket_numeric <- as.numeric(gsub("[^0-9]","",raw$Ticket))
-raw$Ticket_numeric[raw$Ticket_numeric==3] <- NA
-raw$Ticket_group[raw$Ticket_numeric < 75000] <- "A"
-raw$Ticket_group[raw$Ticket_numeric > 75000 & raw$Ticket_numeric < 150000] <- "B"
-raw$Ticket_group[raw$Ticket_numeric > 150000] <- "C"
+raw$Ticket_group[raw$Ticket_numeric < 300000] <- "lowTicketNumber"
+raw$Ticket_group[raw$Ticket_numeric >= 300000] <- "highTicketNumber"
 raw <- cbind(raw,predict(dummyVars(~Ticket_group, data = raw), newdata = raw))
 
 
@@ -40,8 +38,7 @@ library(dplyr)
 raw<-tbl_df(raw)
 raw<-raw %>%
   dplyr::select(-title,-Pclass,-Embarked,-Ticket_numeric,-Embarked.,-Sex,-title.master,-title.miss) %>%
-  dplyr::select(Survived,
-                child,contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
+  dplyr::select(Survived,child,contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
   na.omit() %>%
   mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
 
