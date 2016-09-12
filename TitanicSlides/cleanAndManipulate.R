@@ -13,6 +13,7 @@ raw <- cbind(raw,predict(dummyVars(~title, data = raw), newdata = raw))
 #Pclass
 raw$Pclass <- as.factor(raw$Pclass);raw <- cbind(raw,predict(dummyVars(~Pclass, data = raw), newdata = raw))
 #Embarked
+raw <- raw[raw$Embarked!="",];raw$Embarked<-droplevels((raw$Embarked))
 raw <- cbind(raw,predict(dummyVars(~Embarked, data = raw), newdata = raw))
 #cabin
 raw$cabin <- 0
@@ -24,11 +25,10 @@ raw$Ticket_group[raw$Ticket_numeric >= 300000] <- "highTicketNumber"
 raw <- cbind(raw,predict(dummyVars(~Ticket_group, data = raw), newdata = raw))
 
 
-raw$Embarked[raw$Embarked==""] <- NA
-library(caret)
-set.seed(13343)
-preObj <- preProcess(raw[,-2],method="knnImpute")
-Embarked <- predict(preObj,raw[,-2])$Embarked
+# library(caret)
+# set.seed(13343)
+# preObj <- preProcess(raw[,-2],method="knnImpute")
+# Embarked <- predict(preObj,raw[,-2])$Embarked
 
 raw$adultMale <- 0; raw$adultFemale <- 0; raw$child <- 0 
 raw$adultMale[is.na(raw$Age) & as.character(raw$Sex) == "male"] <- 1
@@ -38,7 +38,7 @@ raw$child[raw$Age<=10 | (raw$Age <= 15 & raw$Parch>0) | raw$SibSp > 1 | raw$titl
 library(dplyr)
 raw<-tbl_df(raw)
 raw<-raw %>%
-  dplyr::select(-title,-Pclass,-Embarked,-Ticket_numeric,-Embarked.,-Sex,-title.master,-title.miss) %>%
+  dplyr::select(-title,-Pclass,-Embarked,-Ticket_numeric,-Sex,-title.master,-title.miss) %>%
   dplyr::select(Survived,child,contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
   na.omit() %>%
   mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
