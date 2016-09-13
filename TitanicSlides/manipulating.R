@@ -8,7 +8,7 @@ Survived <- cleanAndManipulate(train)$Survived[[1]]
 
 library(randomForest)
 set.seed(1)
-rf <- randomForest(predictors,Survived,importance=T,mtry=5)
+rf <- randomForest(predictors,Survived,importance=T,mtry=3)
 
 imp <- importance(rf, type=1)
 featureImportance <- data.frame(Feature=row.names(imp), Importance=imp[,1])
