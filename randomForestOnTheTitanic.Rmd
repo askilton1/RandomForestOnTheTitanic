@@ -19,7 +19,9 @@ str(training_data)
 ```{r, message=TRUE, warning=FALSE,echo=FALSE, include=TRUE}
 suppressMessages(library(VIM))
 aggr(training_data, col=c('navyblue','red'), numbers=TRUE, labels=names(training_data), sortVars=TRUE, cex.axis=.7,prop=TRUE, gap=3, ylab=c("Histogram of missing data","Pattern"))
+marginplot(training_data[,c("Pclass","Cabin")])
 ```
+
 
 
  .class #id 
