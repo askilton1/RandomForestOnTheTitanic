@@ -4,17 +4,29 @@ author: "Antonio Skilton"
 date: "September 12, 2016"
 output: html_document
 
-
 ## training_data 
 ```{r,echo=FALSE}
 training_data <- read.csv("train.csv")
 survived_label <- ifelse(training_data$Survived==1,"survived","died")
 training_data$Cabin[training_data$Cabin==""] <- NA
+source("cleanAndManipulate.R")
 ```
 ```{r,echo=FALSE}
 str(training_data)
 ```
 
+```{r,echo=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+df <- cleanAndManipulate(training_data,clean=FALSE,aggrPlot=FALSE)
+df2 <- df %>% group_by(title,Pclass) %>% summarise(survival_rate = mean(as.numeric(as.character(Survived))),fare = median(Fare),n=n()) %>% mutate(id = paste(title,"| class",Pclass))
+library(ggplot2)
+ggplot(df2,aes(x=fare,y=survival_rate,size=n,color=title,shape=Pclass)) + geom_point()
+# library(googleVis)
+# p <- gvisBubbleChart(df2,idvar="id",xvar="fare",yvar="survival_rate",sizevar="n",options=list(width=1000,height=1000,vAxis.maxValue=1.3))
+```
+
+```{r gv2,results='asis',fig.align='center',echo=FALSE}
+# print(p,"chart")
+```
 
 ```{r, message=TRUE, warning=FALSE,echo=FALSE, include=TRUE}
 suppressMessages(library(VIM))
@@ -22,9 +34,6 @@ aggr(training_data, col=c('navyblue','red'), numbers=TRUE, labels=names(training
 marginplot(training_data[,c("Pclass","Cabin")])
 ```
 
-
-
- .class #id 
 
 ## Name/Title
 #### The names all have some title associated with them:
@@ -34,9 +43,6 @@ training_data$Name[1:9]
 ```
 
 
-
-
-## Name/Title
 #### For most passengers we can produce a category related to title:
 ```{r}
 training_data$title <- NA
@@ -48,24 +54,20 @@ for(string in c("master","mr","miss","mrs")) {
 }
 detach(training_data)
 ```
-#### And we assume that all with alternate titles are adults and assign them titles based on sex
+#### We assume that all with alternate titles are adults and assign them more typical titles based on their sex.
 ```{r}
 attach(training_data)
 training_data$title[is.na(title)]<-ifelse(Sex[is.na(title)]=="female","mrs","mr")
 detach(training_data)
 ```
+#### Lastly, 
 
-
-## Name/Title
 #### Which gives us the following result:
 
 ```{r, message=FALSE, warning=FALSE}
 training_data[1:9,c("Name","title")]
 ```
 
-
-
-## Name/Title
 #### Is there a pattern our models could use to predict survival?
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 library(googleVis)
@@ -82,9 +84,27 @@ p<-gvisColumnChart(df,xvar="title",yvar=c("prcnt","prcnt.certainty"),options=lis
 print(p,"chart")
 ```
 
-###### Clearly, adult men are fare less likely than either adult women or children of either gender to have survived the Titanic.
-
-
+###### Clearly, adult men are fare less likely than either adult women or children of either gender to have survived the Titanic. However, due to how people were assigned titles in the early 20th century, many adult women were referred to as "Miss". Furthermore, for a large percentage of this population, ages are missing (as shown above). I implement the script below in order to isolate children as their own class.
+```{r,echo=FALSE}
+attach(training_data)
+```
+```{r}
+training_data$child <- 0
+training_data$child[Age<=10 | (Age <= 15 & Parch>0) | SibSp > 1 | title=="master"] <- 1
+```
+```{r,echo=FALSE}
+detach(training_data)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+child_label <- ifelse(training_data$child==1,"child","adult")
+table(survived_label,child_label)
+library(dplyr)
+df <- training_data %>% group_by(child) %>% summarize(percent=mean(Survived))  %>% filter(!is.na(child)) %>% mutate(child=ifelse(child==1,"child","adult"))
+# p<-gvisColumnChart(df,xvar="child",yvar=c("percent"),options=list(legend='none',title="Survival rate by 'child' status"))
+```
+```{r gv3, echo=FALSE, message=FALSE, warning=FALSE, results='asis',fig.align='center',fig.height=40}
+# print(p,"chart")
+```
 
 ## Ticket
 #### We have a similar text issue with ticket number ...
