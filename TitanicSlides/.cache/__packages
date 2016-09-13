@@ -6,3 +6,6 @@ dplyr
 ggplot2
 lattice
 caret
+colorspace
+data.table
+VIM

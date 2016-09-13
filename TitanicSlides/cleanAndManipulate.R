@@ -1,4 +1,13 @@
-cleanAndManipulate <- function(raw,linear=FALSE){
+cleanAndManipulate <- function(raw,linear=FALSE,clean=TRUE,aggrPlot=TRUE){
+  raw$Cabin[raw$Cabin==""] <- NA
+  
+  
+  if(aggrPlot==TRUE){ 
+    library(VIM)
+    aggr_plot <- aggr(raw, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(raw), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+    print(aggr_plot)
+  }
+  
 raw$familySize <- raw$Parch + raw$SibSp
 
 #title
@@ -9,6 +18,8 @@ require(caret)
 raw$title <- as.factor(raw$title)
 raw <- cbind(raw,predict(dummyVars(~title, data = raw), newdata = raw))
 
+raw$ageMissing <- 0
+raw$ageMissing[is.na(raw$Age)] <- 1
 
 #Pclass
 raw$Pclass <- as.factor(raw$Pclass);raw <- cbind(raw,predict(dummyVars(~Pclass, data = raw), newdata = raw))
@@ -17,18 +28,13 @@ raw <- raw[raw$Embarked!="",];raw$Embarked<-droplevels((raw$Embarked))
 raw <- cbind(raw,predict(dummyVars(~Embarked, data = raw), newdata = raw))
 #cabin
 raw$cabin <- 0
-raw$cabin[raw$Cabin==""] <- 1
+raw$cabin[is.na(raw$Cabin)] <- 1
+raw <- raw[,names(raw)!="Cabin"]
 #Ticket
 raw$Ticket_numeric <- as.numeric(gsub("[^0-9]","",raw$Ticket))
 raw$Ticket_group[raw$Ticket_numeric < 300000] <- "lowTicketNumber"
 raw$Ticket_group[raw$Ticket_numeric >= 300000] <- "highTicketNumber"
 raw <- cbind(raw,predict(dummyVars(~Ticket_group, data = raw), newdata = raw))
-
-
-# library(caret)
-# set.seed(13343)
-# preObj <- preProcess(raw[,-2],method="knnImpute")
-# Embarked <- predict(preObj,raw[,-2])$Embarked
 
 raw$adultMale <- 0; raw$adultFemale <- 0; raw$child <- 0 
 raw$adultMale[is.na(raw$Age) & as.character(raw$Sex) == "male"] <- 1
@@ -39,11 +45,11 @@ library(dplyr)
 raw<-tbl_df(raw)
 raw<-raw %>%
   dplyr::select(-title,-Pclass,-Embarked,-Ticket_numeric,-Sex,-title.master,-title.miss) %>%
-  dplyr::select(Survived,child,contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize) %>%
+  dplyr::select(Survived,child,contains("title"),contains("Pclass"),cabin,contains("Embarked"),contains("group"),Fare,Parch,familySize,ageMissing) %>%
   na.omit() %>%
   mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
-
 raw$Ticket_group <- as.factor(raw$Ticket_group)
+
 if(linear==FALSE){
   clean <- list() 
   clean$predictors <- raw %>% dplyr::select(-Survived) 
@@ -56,4 +62,4 @@ if(linear==FALSE){
   clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)
 }
 return(clean)
-} 
+}

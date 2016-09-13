@@ -30,6 +30,30 @@ knit        : slidify::knit2slides
 ##  $ Embarked   : Factor w/ 4 levels "","C","Q","S": 4 2 4 4 4 3 4 4 4 2 ...
 ```
 
+---
+
+![plot of chunk unnamed-chunk-3](assets/fig/unnamed-chunk-3-1.png)
+
+```
+## 
+##  Variables sorted by number of missings: 
+##     Variable     Count
+##        Cabin 0.7710438
+##          Age 0.1986532
+##  PassengerId 0.0000000
+##     Survived 0.0000000
+##       Pclass 0.0000000
+##         Name 0.0000000
+##          Sex 0.0000000
+##        SibSp 0.0000000
+##        Parch 0.0000000
+##       Ticket 0.0000000
+##         Fare 0.0000000
+##     Embarked 0.0000000
+```
+
+![plot of chunk unnamed-chunk-3](assets/fig/unnamed-chunk-3-2.png)
+
 
 --- .class #id 
 
@@ -78,6 +102,9 @@ training_data$title[is.na(title)]<-ifelse(Sex[is.na(title)]=="female","mrs","mr"
 detach(training_data)
 ```
 
+```
+## Error in detach(training_data): invalid 'name' argument
+```
 
 --- 
 
@@ -279,12 +306,12 @@ training_data[1:9,c("Ticket","Ticket_numeric")]
 ---
 ## Ticket Number
 #### To find patterns in the assignment of ticket numbers, we plot a histogram
-![plot of chunk unnamed-chunk-15](assets/fig/unnamed-chunk-15-1.png)
+![plot of chunk unnamed-chunk-16](assets/fig/unnamed-chunk-16-1.png)
 
 ---
 
 
-<img src="assets/fig/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" style="display: block; margin: auto;" />
+<img src="assets/fig/unnamed-chunk-17-1.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" />
 
 ```
 ##               
@@ -293,3 +320,36 @@ training_data[1:9,c("Ticket","Ticket_numeric")]
 ##       survived               57             272
 ```
 
+---
+
+
+```
+## Error: found duplicated column name: Ticket_grouphighTicketNumber, Ticket_grouplowTicketNumber
+```
+
+<img src="assets/fig/unnamed-chunk-18-1.png" title="plot of chunk unnamed-chunk-18" alt="plot of chunk unnamed-chunk-18" style="display: block; margin: auto;" />
+
+```
+##               
+## survived_label highTicketNumber lowTicketNumber
+##       died                  222             290
+##       survived               57             272
+```
+
+
+
+---
+
+
+```
+## Error: found duplicated column name: Ticket_grouphighTicketNumber, Ticket_grouplowTicketNumber, Ticket_grouphighTicketNumber, Ticket_grouplowTicketNumber
+```
+
+<img src="assets/fig/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" />
+
+```
+##               
+## survived_label highTicketNumber lowTicketNumber
+##       died                  222             290
+##       survived               57             272
+```

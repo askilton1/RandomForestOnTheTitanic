@@ -15,9 +15,17 @@ knit        : slidify::knit2slides
 ```{r,echo=FALSE}
 training_data <- read.csv("data/train.csv")
 survived_label <- ifelse(training_data$Survived==1,"survived","died")
+training_data$Cabin[training_data$Cabin==""] <- NA
 ```
 ```{r,echo=FALSE}
 str(training_data)
+```
+
+---
+
+```{r, message=TRUE, warning=FALSE,echo=FALSE, include=TRUE}
+library(VIM)
+plot(aggr(training_data, col=c('navyblue','red'), numbers=TRUE, labels=names(training_data), sortVars=TRUE, cex.axis=.7,prop=TRUE, gap=3, ylab=c("Histogram of missing data","Pattern")))
 ```
 
 

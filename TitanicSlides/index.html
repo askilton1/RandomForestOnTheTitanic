@@ -65,6 +65,33 @@
   <!-- Presenter Notes -->
 </slide>
 
+<slide class="" id="slide-2" style="background:;">
+  <article data-timings="">
+    <p><img src="assets/fig/unnamed-chunk-3-1.png" alt="plot of chunk unnamed-chunk-3"></p>
+
+<pre><code>## 
+##  Variables sorted by number of missings: 
+##     Variable     Count
+##        Cabin 0.7710438
+##          Age 0.1986532
+##  PassengerId 0.0000000
+##     Survived 0.0000000
+##       Pclass 0.0000000
+##         Name 0.0000000
+##          Sex 0.0000000
+##        SibSp 0.0000000
+##        Parch 0.0000000
+##       Ticket 0.0000000
+##         Fare 0.0000000
+##     Embarked 0.0000000
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-3-2.png" alt="plot of chunk unnamed-chunk-3"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
 <slide class="class" id="id" style="background:;">
   <hgroup>
     <h2>Name/Title</h2>
@@ -91,7 +118,7 @@
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-3" style="background:;">
+<slide class="" id="slide-4" style="background:;">
   <hgroup>
     <h2>Name/Title</h2>
   </hgroup>
@@ -115,11 +142,14 @@ training_data$title[is.na(title)]&lt;-ifelse(Sex[is.na(title)]==&quot;female&quo
 detach(training_data)
 </code></pre>
 
+<pre><code>## Error in detach(training_data): invalid &#39;name&#39; argument
+</code></pre>
+
   </article>
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-4" style="background:;">
+<slide class="" id="slide-5" style="background:;">
   <hgroup>
     <h2>Name/Title</h2>
   </hgroup>
@@ -145,7 +175,7 @@ detach(training_data)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-5" style="background:;">
+<slide class="" id="slide-6" style="background:;">
   <hgroup>
     <h2>Name/Title</h2>
   </hgroup>
@@ -275,7 +305,7 @@ callbacks.shift()();
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-6" style="background:;">
+<slide class="" id="slide-7" style="background:;">
   <hgroup>
     <h2>Ticket</h2>
   </hgroup>
@@ -302,7 +332,7 @@ callbacks.shift()();
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-7" style="background:;">
+<slide class="" id="slide-8" style="background:;">
   <hgroup>
     <h2>Ticket Number</h2>
   </hgroup>
@@ -332,22 +362,56 @@ training_data$Ticket_numeric &lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quo
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-8" style="background:;">
+<slide class="" id="slide-9" style="background:;">
   <hgroup>
     <h2>Ticket Number</h2>
   </hgroup>
   <article data-timings="">
     <h4>To find patterns in the assignment of ticket numbers, we plot a histogram</h4>
 
-<p><img src="assets/fig/unnamed-chunk-15-1.png" alt="plot of chunk unnamed-chunk-15"></p>
+<p><img src="assets/fig/unnamed-chunk-16-1.png" alt="plot of chunk unnamed-chunk-16"></p>
 
   </article>
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-9" style="background:;">
+<slide class="" id="slide-10" style="background:;">
   <article data-timings="">
-    <p><img src="assets/fig/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" style="display: block; margin: auto;" /></p>
+    <p><img src="assets/fig/unnamed-chunk-17-1.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" /></p>
+
+<pre><code>##               
+## survived_label highTicketNumber lowTicketNumber
+##       died                  222             290
+##       survived               57             272
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-11" style="background:;">
+  <article data-timings="">
+    <pre><code>## Error: found duplicated column name: Ticket_grouphighTicketNumber, Ticket_grouplowTicketNumber
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-18-1.png" title="plot of chunk unnamed-chunk-18" alt="plot of chunk unnamed-chunk-18" style="display: block; margin: auto;" /></p>
+
+<pre><code>##               
+## survived_label highTicketNumber lowTicketNumber
+##       died                  222             290
+##       survived               57             272
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-12" style="background:;">
+  <article data-timings="">
+    <pre><code>## Error: found duplicated column name: Ticket_grouphighTicketNumber, Ticket_grouplowTicketNumber, Ticket_grouphighTicketNumber, Ticket_grouplowTicketNumber
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
 
 <pre><code>##               
 ## survived_label highTicketNumber lowTicketNumber
@@ -371,7 +435,7 @@ training_data$Ticket_numeric &lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quo
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=2 title='Name/Title'>
+        data-slide=2 title='NA'>
          2
       </a>
     </li>
@@ -395,13 +459,13 @@ training_data$Ticket_numeric &lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quo
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=6 title='Ticket'>
+        data-slide=6 title='Name/Title'>
          6
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=7 title='Ticket Number'>
+        data-slide=7 title='Ticket'>
          7
       </a>
     </li>
@@ -413,8 +477,26 @@ training_data$Ticket_numeric &lt;- as.numeric(gsub(&quot;[^0-9]&quot;,&quot;&quo
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=9 title='NA'>
+        data-slide=9 title='Ticket Number'>
          9
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=10 title='NA'>
+         10
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=11 title='NA'>
+         11
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=12 title='NA'>
+         12
       </a>
     </li>
   </ul>

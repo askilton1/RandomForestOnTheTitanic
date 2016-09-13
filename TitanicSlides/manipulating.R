@@ -4,7 +4,6 @@ train <- tbl_df(read.csv("data/train.csv"))
 test <- tbl_df(read.csv("data/test.csv")) 
 source("cleanAndManipulate.R")
 predictors <- cleanAndManipulate(train)$predictors
-#predictors.test <- cleanAndManipulate(test)$predictors
 Survived <- cleanAndManipulate(train)$Survived[[1]]
 
 library(randomForest)
