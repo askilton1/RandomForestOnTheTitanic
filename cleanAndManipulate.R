@@ -1,4 +1,4 @@
-cleanAndManipulate <- function(raw,linear=FALSE,clean=TRUE,aggrPlot=TRUE){
+cleanAndManipulate <- function(raw,logit=FALSE,clean=TRUE,aggrPlot=FALSE){
   raw$Cabin[raw$Cabin==""] <- NA
   
   
@@ -48,14 +48,14 @@ raw<-raw %>%
   mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
 raw$Ticket_group <- as.factor(raw$Ticket_group)
 if(clean==TRUE){ 
-  if(linear==FALSE){
+  if(logit==FALSE){
     clean <- list() 
     clean$predictors <- raw %>% dplyr::select(-Survived,-contains("Embarked."),-title,-Pclass) 
     clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)
     return(clean)
-  } else if (linear==TRUE){
+  } else {
     raw <- raw %>%
-      dplyr::select(-title.mr,-Pclass.3,-Embarked.S,-Ticket_grouphighTicketNumber,-title,-Pclass)
+      dplyr::select(-title.mrs,-Pclass.3,-Embarked.S,-Ticket_grouphighTicketNumber,-title,-Pclass,-Ticket_group)
     clean <- list() 
     clean$predictors <- raw %>% dplyr::select(-Survived,-Embarked) 
     clean$Survived <- raw %>% dplyr::select(Survived) %>% mutate_all(as.factor)
@@ -64,3 +64,8 @@ if(clean==TRUE){
 } else {
 return(raw)}
 }
+
+
+f2n <- function(fac) as.numeric(as.character(fac))
+cost <- function(r, pi = 0) mean(abs(r-pi) > 0.5)
+grid <- 10^seq(10,-2, length=100)#possible values for lambda
