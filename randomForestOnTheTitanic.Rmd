@@ -1,151 +1,162 @@
-
+---
+output: pdf_document
 title: "A Random Forest on the Titanic"
 author: "Antonio Skilton"
 date: "September 12, 2016"
-output: html_document
+---
 
-## training_data 
-```{r,echo=FALSE}
-training_data <- read.csv("train.csv")
-survived_label <- ifelse(training_data$Survived==1,"survived","died")
-training_data$Cabin[training_data$Cabin==""] <- NA
+## The Data
+```{r,echo=FALSE,message=FALSE}
+library(knitr)
+```
+```{r,echo=TRUE}
+data <- read.csv("train.csv")
+survived_label <- ifelse(data$Survived==1,"survived","died")
+data$Cabin[data$Cabin==""] <- NA
 source("cleanAndManipulate.R")
 ```
 ```{r,echo=FALSE}
-str(training_data)
+data2 <- data
+data2$Name <- paste(substr(data$Name, 1, 10),"...",sep="")
 ```
 
-```{r,echo=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
-df <- cleanAndManipulate(training_data,clean=FALSE,aggrPlot=FALSE)
-df2 <- df %>% group_by(title,Pclass) %>% summarise(survival_rate = mean(as.numeric(as.character(Survived))),fare = median(Fare),n=n()) %>% mutate(id = paste(title,"| class",Pclass))
-library(ggplot2)
-ggplot(df2,aes(x=fare,y=survival_rate,size=n,color=title,shape=Pclass)) + geom_point()
-# library(googleVis)
-# p <- gvisBubbleChart(df2,idvar="id",xvar="fare",yvar="survival_rate",sizevar="n",options=list(width=1000,height=1000,vAxis.maxValue=1.3))
+```{r,echo=FALSE}
+kable(t(data2[1:5,]),caption="First 5 Observations in Passenger Data",align='c')
 ```
 
-```{r gv2,results='asis',fig.align='center',echo=FALSE}
-# print(p,"chart")
+\newpage
+
+##Missing Data
+```{r, message=FALSE, warning=FALSE,echo=TRUE, include=TRUE}
+library(VIM)
+aggr(data, col=c('navyblue','red'), numbers=TRUE,
+     labels=names(data), sortVars=FALSE, cex.axis=.7,
+     prop=TRUE, gap=3, ylab=c("Histogram of missing data","Pattern"))
 ```
 
-```{r, message=TRUE, warning=FALSE,echo=FALSE, include=TRUE}
-suppressMessages(library(VIM))
-aggr(training_data, col=c('navyblue','red'), numbers=TRUE, labels=names(training_data), sortVars=TRUE, cex.axis=.7,prop=TRUE, gap=3, ylab=c("Histogram of missing data","Pattern"))
-marginplot(training_data[,c("Pclass","Cabin")])
-```
-
+\newpage
 
 ## Name/Title
-#### The names all have some title associated with them:
-
+#### As seen above, passenger names all have some title associated with them. I suspect that there is infmation to be gleaned from titles in the names that might not be available in either Sex or Age.
 ```{r}
-training_data$Name[1:9]
+data$title <- NA
+for(string in c("master","mr","miss","mrs")){ 
+  data$title[grepl(string,data$Name,ignore.case=T)] <- string}
 ```
 
-
-#### For most passengers we can produce a category related to title:
+#### After creating a new column for titles, I fill in missing variables. I assume that those missing a traditional title are adults and supply them a replacement title based upon their age and sex.
 ```{r}
-training_data$title <- NA
-attach(training_data)
-
-
-for(string in c("master","mr","miss","mrs")) {
-  training_data$title[grepl(string,Name,ignore.case=T)] <- string 
-}
-detach(training_data)
-```
-#### We assume that all with alternate titles are adults and assign them more typical titles based on their sex.
-```{r}
-attach(training_data)
-training_data$title[is.na(title)]<-ifelse(Sex[is.na(title)]=="female","mrs","mr")
-detach(training_data)
-```
-#### Lastly, 
-
-#### Which gives us the following result:
-
-```{r, message=FALSE, warning=FALSE}
-training_data[1:9,c("Name","title")]
+data$title[is.na(data$title)] <- ifelse(data$Sex[is.na(data$title)]=="female","mrs","mr")
 ```
 
-#### Is there a pattern our models could use to predict survival?
-```{r, message=FALSE, warning=FALSE, include=FALSE}
-library(googleVis)
+```{r,echo=FALSE}
+data$title <- as.factor(data$title)
+kable(data[1:10,c("title","Name","Sex")],caption="The new 'title' column, made from 'Name' and 'Sex'")
 ```
+
+#### There are clear differences in survival rates that are associated with title. 
+
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
-table(survived_label,training_data$title)
-library(dplyr)
-df <- training_data %>% group_by(title) %>% summarize(prcnt=mean(Survived), prcnt.html.tooltip=n()) %>%filter(!is.na(title)) %>% mutate(prcnt.certainty=c(TRUE,FALSE,TRUE,FALSE))
-p<-gvisColumnChart(df,xvar="title",yvar=c("prcnt","prcnt.certainty"),options=list(legend='none',
-  title="In-Group Survival Rate by Title")
-  )
-```
-```{r gv, echo=FALSE, message=FALSE, warning=FALSE, results='asis',fig.align='center',fig.height=20}
-print(p,"chart")
+kable(table(survived_label,data$title))
 ```
 
-###### Clearly, adult men are fare less likely than either adult women or children of either gender to have survived the Titanic. However, due to how people were assigned titles in the early 20th century, many adult women were referred to as "Miss". Furthermore, for a large percentage of this population, ages are missing (as shown above). I implement the script below in order to isolate children as their own class.
-```{r,echo=FALSE}
-attach(training_data)
-```
+\newpage 
+
+##Other variables
+
+###Child
+
+#### Anybody who is either below or equal to the age of 10, below or equal to the age of 10 *and* is accompanied by a parent, is traveling with more than one sibling, or has the name "master" is recorded as a child.
 ```{r}
-training_data$child <- 0
-training_data$child[Age<=10 | (Age <= 15 & Parch>0) | SibSp > 1 | title=="master"] <- 1
-```
-```{r,echo=FALSE}
-detach(training_data)
-```
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
-child_label <- ifelse(training_data$child==1,"child","adult")
-table(survived_label,child_label)
-library(dplyr)
-df <- training_data %>% group_by(child) %>% summarize(percent=mean(Survived))  %>% filter(!is.na(child)) %>% mutate(child=ifelse(child==1,"child","adult"))
-# p<-gvisColumnChart(df,xvar="child",yvar=c("percent"),options=list(legend='none',title="Survival rate by 'child' status"))
-```
-```{r gv3, echo=FALSE, message=FALSE, warning=FALSE, results='asis',fig.align='center',fig.height=40}
-# print(p,"chart")
+data$child <- ifelse(
+  data$Age<=10 | (data$Age <= 15 & data$Parch>0) | data$SibSp > 1 | data$title=="master",
+  1,0)
 ```
 
-## Ticket
-#### We have a similar text issue with ticket number ...
-
+###Missing Age
+####Variable is equal to 1 where passenger has no recorded age.
 ```{r}
-training_data$Ticket[1:40]
+data$ageMissing <- ifelse(is.na(data$Age),1,0)
 ```
 
-
-
-## Ticket Number
-#### ... which we can solve with the gsub function:
-```{r, message=FALSE, warning=FALSE}
-attach(training_data)
-training_data$Ticket_numeric <- as.numeric(gsub("[^0-9]","",Ticket))
-```
-```{r,echo=FALSE}
-training_data$Ticket_numeric[training_data$Ticket_numeric==3] <- NA
-detach(training_data)
-```
+###Cabin
+####Variable is equal to 1 where passenger has no recorded cabin.
 ```{r}
-training_data[1:9,c("Ticket","Ticket_numeric")]
-```
-```{r,echo=FALSE}
-training_data$Ticket_numeric[training_data$Ticket_numeric==3 | training_data$Ticket_numeric > 2500000] <- NA
+data$cabin <- ifelse(is.na(data$Cabin),1,0)
 ```
 
-
-#### To find patterns in the assignment of ticket numbers, we plot a histogram
+###Ticket number
+####The ticket numbers include both special characters and non-numeric characters before I clean them. I then seperate them into groups based upon the uneven distribution of the ticket numbers.
 ```{r}
-training_data$Ticket_group[training_data$Ticket_numeric < 300000] <- "lowTicketNumber"
-training_data$Ticket_group[training_data$Ticket_numeric >= 300000] <- "highTicketNumber"
+data$Ticket_numeric <- as.numeric(gsub("[^0-9]","",data$Ticket))
+data$Ticket_group <- as.factor(ifelse(data$Ticket_numeric < 300000,"lowTicketNumber","highTicketNumber"))
 ```
-```{r, message=FALSE, warning=FALSE, echo=FALSE,fig.align='center',fig.width=12,fig.height=6}
+
+####Family Size
+```{r}
+data$familySize <- data$Parch + data$SibSp
+```
+
+
+###Dummy Variables
+```{r,echo=FALSE,message=FALSE}
 library(caret)
-training_data <- cbind(training_data,predict(dummyVars(~Ticket_group, data = training_data), newdata = training_data))
-df <- training_data %>% select(Ticket_group,Ticket_numeric) %>% na.omit()
-library(ggplot2)
-ggplot(training_data,aes(Ticket_numeric,fill=Ticket_group)) +
-  geom_histogram(binwidth=5000) 
-table(survived_label,training_data$Ticket_group)
+data <- data[data$Embarked!="",]
+data$Embarked <- droplevels((data$Embarked))
+data$Pclass <- as.factor(data$Pclass)
 ```
 
+####with the following code we produce the dummy variables for the Embarked, Pclass, title, and Ticket_group columns.
+```{r}
+data <- cbind(data,
+              predict(
+                dummyVars(~Embarked + Pclass + title + Ticket_group, data = data),
+                newdata = data)
+              )
+```
 
+\newpage
+
+##Final Edits
+####Using the dplyr package I remove columns that through trial and error I have found increase the classification error rate in the random forest model.
+```{r, message=FALSE}
+library(dplyr)
+data<-data %>%
+    dplyr::select(-Ticket_numeric,-Sex,-title.master,
+                  -title.miss,-Cabin,-Pclass,-title) %>%
+    dplyr::select(Survived,child,contains("title"),
+                  contains("Pclass"),cabin,contains("group"),
+                  Fare,Parch,familySize,ageMissing) 
+```
+
+```{r,echo=FALSE}
+data <- data%>%
+    na.omit() %>%
+    mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
+```
+
+```{r}
+Survived <- select(data, Survived) %>% unlist()  %>% as.factor()
+predictors <- select(data, -Survived)
+```
+
+\newpage
+
+##Random Forest Model
+```{r,message=FALSE}
+library(randomForest)
+set.seed(1)
+randomForest(predictors,Survived,importance=T,mtry=3,xtest=)
+```
+
+####We can now test the model on test.csv. The above cleaning and manipulation is performed by the cleanAndManipulate() function.
+```{r}
+test <- read.csv("test.csv")
+source("cleanAndManipulate.r")
+test2 <- cleanAndManipulate(test,test=TRUE)
+library(randomForest)
+set.seed(1)
+randomForest(predictors,Survived,importance=T,mtry=3,xtest=test2)
+```
+
+####The test error rate os close to the error rate from the training data! Success!
