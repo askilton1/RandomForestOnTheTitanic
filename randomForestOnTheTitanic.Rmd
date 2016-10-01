@@ -1,0 +1,162 @@
+---
+output: pdf_document
+title: "A Random Forest on the Titanic"
+author: "Antonio Skilton"
+date: "September 12, 2016"
+---
+
+## The Data
+```{r,echo=FALSE,message=FALSE}
+library(knitr)
+```
+```{r,echo=TRUE}
+data <- read.csv("train.csv")
+survived_label <- ifelse(data$Survived==1,"survived","died")
+data$Cabin[data$Cabin==""] <- NA
+source("cleanAndManipulate.R")
+```
+```{r,echo=FALSE}
+data2 <- data
+data2$Name <- paste(substr(data$Name, 1, 10),"...",sep="")
+```
+
+```{r,echo=FALSE}
+kable(t(data2[1:5,]),caption="First 5 Observations in Passenger Data",align='c')
+```
+
+\newpage
+
+##Missing Data
+```{r, message=FALSE, warning=FALSE,echo=TRUE, include=TRUE}
+library(VIM)
+aggr(data, col=c('navyblue','red'), numbers=TRUE,
+     labels=names(data), sortVars=FALSE, cex.axis=.7,
+     prop=TRUE, gap=3, ylab=c("Histogram of missing data","Pattern"))
+```
+
+\newpage
+
+## Name/Title
+#### As seen above, passenger names all have some title associated with them. I suspect that there is infmation to be gleaned from titles in the names that might not be available in either Sex or Age.
+```{r}
+data$title <- NA
+for(string in c("master","mr","miss","mrs")){ 
+  data$title[grepl(string,data$Name,ignore.case=T)] <- string}
+```
+
+#### After creating a new column for titles, I fill in missing variables. I assume that those missing a traditional title are adults and supply them a replacement title based upon their age and sex.
+```{r}
+data$title[is.na(data$title)] <- ifelse(data$Sex[is.na(data$title)]=="female","mrs","mr")
+```
+
+```{r,echo=FALSE}
+data$title <- as.factor(data$title)
+kable(data[1:10,c("title","Name","Sex")],caption="The new 'title' column, made from 'Name' and 'Sex'")
+```
+
+#### There are clear differences in survival rates that are associated with title. 
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+kable(table(survived_label,data$title))
+```
+
+\newpage 
+
+##Other variables
+
+###Child
+
+#### Anybody who is either below or equal to the age of 10, below or equal to the age of 10 *and* is accompanied by a parent, is traveling with more than one sibling, or has the name "master" is recorded as a child.
+```{r}
+data$child <- ifelse(
+  data$Age<=10 | (data$Age <= 15 & data$Parch>0) | data$SibSp > 1 | data$title=="master",
+  1,0)
+```
+
+###Missing Age
+####Variable is equal to 1 where passenger has no recorded age.
+```{r}
+data$ageMissing <- ifelse(is.na(data$Age),1,0)
+```
+
+###Cabin
+####Variable is equal to 1 where passenger has no recorded cabin.
+```{r}
+data$cabin <- ifelse(is.na(data$Cabin),1,0)
+```
+
+###Ticket number
+####The ticket numbers include both special characters and non-numeric characters before I clean them. I then seperate them into groups based upon the uneven distribution of the ticket numbers.
+```{r}
+data$Ticket_numeric <- as.numeric(gsub("[^0-9]","",data$Ticket))
+data$Ticket_group <- as.factor(ifelse(data$Ticket_numeric < 300000,"lowTicketNumber","highTicketNumber"))
+```
+
+####Family Size
+```{r}
+data$familySize <- data$Parch + data$SibSp
+```
+
+
+###Dummy Variables
+```{r,echo=FALSE,message=FALSE}
+library(caret)
+data <- data[data$Embarked!="",]
+data$Embarked <- droplevels((data$Embarked))
+data$Pclass <- as.factor(data$Pclass)
+```
+
+####with the following code we produce the dummy variables for the Embarked, Pclass, title, and Ticket_group columns.
+```{r}
+data <- cbind(data,
+              predict(
+                dummyVars(~Embarked + Pclass + title + Ticket_group, data = data),
+                newdata = data)
+              )
+```
+
+\newpage
+
+##Final Edits
+####Using the dplyr package I remove columns that through trial and error I have found increase the classification error rate in the random forest model.
+```{r, message=FALSE}
+library(dplyr)
+data<-data %>%
+    dplyr::select(-Ticket_numeric,-Sex,-title.master,
+                  -title.miss,-Cabin,-Pclass,-title) %>%
+    dplyr::select(Survived,child,contains("title"),
+                  contains("Pclass"),cabin,contains("group"),
+                  Fare,Parch,familySize,ageMissing) 
+```
+
+```{r,echo=FALSE}
+data <- data%>%
+    na.omit() %>%
+    mutate_if(function(col) ifelse(is.factor(col),FALSE,max(col)==1 & min(col)==0),as.factor)
+```
+
+```{r}
+Survived <- select(data, Survived) %>% unlist()  %>% as.factor()
+predictors <- select(data, -Survived)
+```
+
+\newpage
+
+##Random Forest Model
+```{r,message=FALSE}
+library(randomForest)
+set.seed(1)
+randomForest(predictors,Survived,importance=T,mtry=3,xtest=)
+```
+
+####We can now test the model on test.csv. The above cleaning and manipulation is performed by the cleanAndManipulate() function.
+```{r}
+test <- read.csv("test.csv")
+source("cleanAndManipulate.r")
+test2 <- cleanAndManipulate(test,test=TRUE)
+library(randomForest)
+set.seed(1)
+randomForest(predictors,Survived,importance=T,mtry=3,xtest=test2)
+```
+
+####The test error rate os close to the error rate from the training data! Success!
